@@ -3,6 +3,7 @@ package com.example.rent.movieapp;
 import io.reactivex.Observable;
 import retrofit2.http.Field;
 import retrofit2.http.GET;
+import retrofit2.http.Query;
 
 /**
  * Created by RENT on 2017-03-08.
@@ -10,6 +11,6 @@ import retrofit2.http.GET;
 
 public interface SearchService {
     @GET("/")
-    Observable<SearchResult> search(@Field("s") String title);
+    Observable<SearchResult> search(@Query("s") String title, @Query("y") String year, @Query("type") String type);
 }
 

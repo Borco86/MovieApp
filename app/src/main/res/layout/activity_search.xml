@@ -15,10 +15,10 @@
 
         <android.support.design.widget.TextInputEditText
             android:id="@+id/search_edit_text"
-            android:lines="1"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="@string/search_hint" />
+            android:hint="@string/search_hint"
+            android:lines="1" />
     </android.support.design.widget.TextInputLayout>
 
     <ImageButton
@@ -28,4 +28,69 @@
         android:layout_alignParentRight="true"
         android:layout_margin="4dp"
         app:srcCompat="@drawable/ic_search" />
+
+    <CheckBox
+        android:id="@+id/year_checkbox"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/text_input_layout"
+        android:layout_marginBottom="16dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginTop="16dp"
+        android:text="Z roku: " />
+
+    <NumberPicker
+        android:id="@+id/number_picker"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/year_checkbox"
+        android:layout_marginLeft="26dp"
+        android:visibility="gone" />
+
+    <CheckBox
+        android:id="@+id/type_checkbox"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_below="@id/text_input_layout"
+        android:layout_marginBottom="16dp"
+        android:layout_marginRight="16dp"
+        android:layout_marginTop="16dp"
+        android:text="typu: " />
+
+    <RadioGroup
+        android:id="@+id/radio_group"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_below="@id/type_checkbox"
+        android:layout_marginRight="16dp"
+        android:layout_marginTop="16dp"
+        android:visibility="gone">
+
+        <RadioButton
+            android:id="@+id/radio_movies"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Filmy" />
+
+        <RadioButton
+            android:id="@+id/radio_series"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Seriale" />
+
+        <RadioButton
+            android:id="@+id/radio_games"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Gry" />
+
+        <RadioButton
+            android:id="@+id/radio_episodes"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Odcinki" />
+    </RadioGroup>
+
 </RelativeLayout>
