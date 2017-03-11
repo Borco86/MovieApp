@@ -1,5 +1,6 @@
-package com.example.rent.movieapp;
+package com.example.rent.movieapp.search;
 
+import com.example.rent.movieapp.listing.MovieListingItem;
 import com.google.gson.annotations.SerializedName;
 
 import java.util.List;

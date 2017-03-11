@@ -1,4 +1,7 @@
-package com.example.rent.movieapp;
+package com.example.rent.movieapp.listing;
+
+import com.example.rent.movieapp.search.SearchResult;
+import com.example.rent.movieapp.search.SearchService;
 
 import io.reactivex.Observable;
 import nucleus.presenter.Presenter;
@@ -15,13 +18,13 @@ public class ListingPresenter extends Presenter<ListingActivity> {
     private Retrofit retrofit;
 
     // konfiguracja retrofita
-    public ListingPresenter() {
-        retrofit = new Retrofit.Builder()
-                .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
-                .addConverterFactory(GsonConverterFactory.create())
-                .baseUrl("https://www.omdbapi.com/")
-                .build();
-    }
+//    public ListingPresenter() {
+//        retrofit = new Retrofit.Builder()
+//                .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
+//                .addConverterFactory(GsonConverterFactory.create())
+//                .baseUrl("https://www.omdbapi.com/")
+//                .build();
+//    }
 
     public Observable<SearchResult> getDataAsync(String title, int year, String type) {
        String stringYear = year == ListingActivity.NO_YEAR_SELECTED ? null : String.valueOf(year);
@@ -39,6 +42,10 @@ public class ListingPresenter extends Presenter<ListingActivity> {
 //                }
 //            }
 //        }.start();
+    }
+
+    public void setRetrofit(Retrofit retrofit) {
+        this.retrofit = retrofit;
     }
 
 

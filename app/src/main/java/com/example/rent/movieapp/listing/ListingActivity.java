@@ -1,18 +1,18 @@
-package com.example.rent.movieapp;
+package com.example.rent.movieapp.listing;
 
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.Toast;
 import android.widget.ViewFlipper;
 
-import com.annimon.stream.Stream;
-import com.annimon.stream.function.Consumer;
+import com.example.rent.movieapp.R;
+import com.example.rent.movieapp.RetrofitProvider;
+import com.example.rent.movieapp.search.SearchResult;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -50,6 +50,11 @@ public class ListingActivity extends NucleusAppCompatActivity<ListingPresenter> 
 
         ButterKnife.bind(this);
 
+        if (savedInstanceState == null) {
+            RetrofitProvider retrofitProvider = (RetrofitProvider) getApplication();
+            getPresenter().setRetrofit(retrofitProvider.provideRetrofit());
+        }
+
         String title = getIntent().getStringExtra(SEARCH_TITLE);
         int year = getIntent().getIntExtra(SEARCH_YEAR, NO_YEAR_SELECTED);
         String type = getIntent().getStringExtra(SEARCH_TYPE);
@@ -57,17 +62,17 @@ public class ListingActivity extends NucleusAppCompatActivity<ListingPresenter> 
         recyclerView.setAdapter(adapter);
 
         //typowa rx java z nucleusem
-        getPresenter().getDataAsync(title,year,type)
-        .subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread())
-        .subscribe(this::success, this::error);
+        getPresenter().getDataAsync(title, year, type)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(this::success, this::error);
 
 
     }
 
     //Butterknife przed adnotacje
     @OnClick(R.id.no_internet_view)
-    public void onNoInternetImageView(View view){
+    public void onNoInternetImageView(View view) {
         Toast.makeText(this, "kliknąłeś no internet image view", Toast.LENGTH_SHORT).show();
     }
 
@@ -76,12 +81,14 @@ public class ListingActivity extends NucleusAppCompatActivity<ListingPresenter> 
     }
 
     private void success(SearchResult searchResult) {
-        if("false".equalsIgnoreCase(searchResult.getResponse())){
+        if ("false".equalsIgnoreCase(searchResult.getResponse())) {
+            viewFlipper.setDisplayedChild(viewFlipper.indexOfChild(noResults));
+            //TODO viewFlipper.setDisplayedChild(viewFlipper.indexOfChild(noResults/recyclerView));
+        } else {
             viewFlipper.setDisplayedChild(viewFlipper.indexOfChild(recyclerView));
-        }else{
-        viewFlipper.setDisplayedChild(viewFlipper.indexOfChild(recyclerView));
-        adapter.setItems(searchResult.getItems());
-    }}
+            adapter.setItems(searchResult.getItems());
+        }
+    }
 
     public static Intent createIntent(Context context, String title, int year, String type) {
         Intent intent = new Intent(context, ListingActivity.class);

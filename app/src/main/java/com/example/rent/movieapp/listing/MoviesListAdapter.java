@@ -1,4 +1,4 @@
-package com.example.rent.movieapp;
+package com.example.rent.movieapp.listing;
 
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -8,6 +8,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.example.rent.movieapp.R;
 
 import java.util.Collections;
 import java.util.List;

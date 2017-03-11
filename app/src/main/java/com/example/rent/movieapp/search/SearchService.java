@@ -1,7 +1,6 @@
-package com.example.rent.movieapp;
+package com.example.rent.movieapp.search;
 
 import io.reactivex.Observable;
-import retrofit2.http.Field;
 import retrofit2.http.GET;
 import retrofit2.http.Query;
 
