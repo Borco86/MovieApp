@@ -3,10 +3,12 @@ package com.example.rent.movieapp.listing;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ViewFlipper;
 
@@ -24,7 +26,7 @@ import nucleus.view.NucleusAppCompatActivity;
 //import rx.schedulers.Schedulers;
 
 @RequiresPresenter(ListingPresenter.class)
-public class ListingActivity extends NucleusAppCompatActivity<ListingPresenter> {
+public class ListingActivity extends NucleusAppCompatActivity<ListingPresenter> implements CurrentItemListener, ShowOnHideCounter{
 
     private static final String SEARCH_TITLE = "searchTitle";
     private static final String SEARCH_YEAR = "searchYear";
@@ -41,6 +43,10 @@ public class ListingActivity extends NucleusAppCompatActivity<ListingPresenter> 
     RecyclerView recyclerView;
     @BindView(R.id.no_results)
     FrameLayout noResults;
+    private EndlessScrollListener endlessScrollListener;
+
+    @BindView(R.id.counter)
+    TextView counter;
 
 
     @Override
@@ -60,12 +66,19 @@ public class ListingActivity extends NucleusAppCompatActivity<ListingPresenter> 
         String type = getIntent().getStringExtra(SEARCH_TYPE);
         adapter = new MoviesListAdapter();
         recyclerView.setAdapter(adapter);
+        LinearLayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL,false);
+        recyclerView.setLayoutManager(layoutManager);
+        endlessScrollListener = new EndlessScrollListener(layoutManager, getPresenter());
+        recyclerView.addOnScrollListener(endlessScrollListener);
+        endlessScrollListener.setCurrentItemListener(this);
+        endlessScrollListener.setShowOrHideCounter(this);
 
         //typowa rx java z nucleusem
         getPresenter().getDataAsync(title, year, type)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::success, this::error);
+        counter.setTranslationX(counter.getWidth()*2);
 
 
     }
@@ -80,13 +93,20 @@ public class ListingActivity extends NucleusAppCompatActivity<ListingPresenter> 
         viewFlipper.setDisplayedChild(viewFlipper.indexOfChild(noInternetImage));
     }
 
+    public void appendItems(SearchResult searchResult){
+        adapter.addItems(searchResult.getItems());
+        endlessScrollListener.setTotalItemsNumber(Integer.parseInt(searchResult.getTotalResults()));
+    }
+
     private void success(SearchResult searchResult) {
+
         if ("false".equalsIgnoreCase(searchResult.getResponse())) {
             viewFlipper.setDisplayedChild(viewFlipper.indexOfChild(noResults));
             //TODO viewFlipper.setDisplayedChild(viewFlipper.indexOfChild(noResults/recyclerView));
         } else {
             viewFlipper.setDisplayedChild(viewFlipper.indexOfChild(recyclerView));
             adapter.setItems(searchResult.getItems());
+            endlessScrollListener.setTotalItemsNumber(Integer.parseInt(searchResult.getTotalResults()));
         }
     }
 
@@ -96,6 +116,22 @@ public class ListingActivity extends NucleusAppCompatActivity<ListingPresenter> 
         intent.putExtra(SEARCH_YEAR, year);
         intent.putExtra(SEARCH_TYPE, type);
         return intent;
+    }
+
+    @Override
+    public void onNewCurrentItem(int currentItem, int totalItemsCount) {
+        counter.setText(currentItem+"/"+totalItemsCount);
+    }
+
+    @Override
+    public void showCounter() {
+        counter.setVisibility(View.VISIBLE);
+        counter.animate().translationX(0).start();
+    }
+
+    @Override
+    public void hideCounter() {
+        counter.animate().translationX(counter.getWidth()+2).start();
     }
 
 

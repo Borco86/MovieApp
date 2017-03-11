@@ -20,11 +20,19 @@ public class SearchResult {
         return items;
     }
 
-    public String getTotalResult() {
+    public String getTotalResults() {
         return totalResult;
     }
 
     public String getResponse() {
         return response;
+    }
+
+    public void setItems(List<MovieListingItem> items) {
+        this.items = items;
+    }
+
+    public void setTotalResult(String totalResult) {
+        this.totalResult = totalResult;
     }
 }
