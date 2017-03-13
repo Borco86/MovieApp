@@ -12,7 +12,7 @@ import java.util.List;
 public class SearchResult {
     @SerializedName("Search")
     private List<MovieListingItem> items ;
-    private String totalResult;
+    private String totalResults;
     @SerializedName("Response")
     private String response;
 
@@ -21,7 +21,7 @@ public class SearchResult {
     }
 
     public String getTotalResults() {
-        return totalResult;
+        return totalResults;
     }
 
     public String getResponse() {
@@ -32,7 +32,7 @@ public class SearchResult {
         this.items = items;
     }
 
-    public void setTotalResult(String totalResult) {
-        this.totalResult = totalResult;
+    public void setTotalResult(String totalResults) {
+        this.totalResults = totalResults;
     }
 }

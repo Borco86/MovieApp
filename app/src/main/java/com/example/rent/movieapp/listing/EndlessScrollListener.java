@@ -39,7 +39,7 @@ public class EndlessScrollListener extends RecyclerView.OnScrollListener {
         super.onScrolled(recyclerView, dx, dy);
 
         int alreadyLoadedItems = layoutManager.getItemCount();
-        int currentPage = (int) Math.ceil(alreadyLoadedItems / (int) PAGE_SIZE);
+        int currentPage = (int) Math.ceil(alreadyLoadedItems / PAGE_SIZE);
         double numberOfAllPages = Math.ceil(totalItemsNumber / PAGE_SIZE);
         int lastVisibleItemPosition = layoutManager.findLastVisibleItemPosition();
 

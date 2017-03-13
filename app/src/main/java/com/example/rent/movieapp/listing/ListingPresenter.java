@@ -32,11 +32,11 @@ public class ListingPresenter extends Presenter<ListingActivity> implements OnLo
 //                .build();
 //    }
 
-    public Observable<SearchResult> getDataAsync(String title, int year, String type) {
+    public Observable<SearchResult> getDataAsync(int page,String title, int year, String type) {
         this.title=title;
         this.type = type;
        stringYear = year == ListingActivity.NO_YEAR_SELECTED ? null : String.valueOf(year);
-        return retrofit.create(SearchService.class).search(1,title, stringYear, type);
+        return retrofit.create(SearchService.class).search(page,title, stringYear, type);
 
 //        new Thread() {
 //            @Override
@@ -62,6 +62,7 @@ public class ListingPresenter extends Presenter<ListingActivity> implements OnLo
         .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(searchResult -> getView().appendItems(searchResult));
+        //TODO throwable lambda?
     }
 
 

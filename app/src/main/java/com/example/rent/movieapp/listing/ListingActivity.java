@@ -3,6 +3,7 @@ package com.example.rent.movieapp.listing;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
@@ -26,7 +27,7 @@ import nucleus.view.NucleusAppCompatActivity;
 //import rx.schedulers.Schedulers;
 
 @RequiresPresenter(ListingPresenter.class)
-public class ListingActivity extends NucleusAppCompatActivity<ListingPresenter> implements CurrentItemListener, ShowOnHideCounter{
+public class ListingActivity extends NucleusAppCompatActivity<ListingPresenter> implements CurrentItemListener, ShowOnHideCounter {
 
     private static final String SEARCH_TITLE = "searchTitle";
     private static final String SEARCH_YEAR = "searchYear";
@@ -47,6 +48,8 @@ public class ListingActivity extends NucleusAppCompatActivity<ListingPresenter> 
 
     @BindView(R.id.counter)
     TextView counter;
+    @BindView(R.id.swipe_refresh)
+    SwipeRefreshLayout swipeRefreshLayout;
 
 
     @Override
@@ -66,21 +69,30 @@ public class ListingActivity extends NucleusAppCompatActivity<ListingPresenter> 
         String type = getIntent().getStringExtra(SEARCH_TYPE);
         adapter = new MoviesListAdapter();
         recyclerView.setAdapter(adapter);
-        LinearLayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL,false);
+        LinearLayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
         recyclerView.setLayoutManager(layoutManager);
         endlessScrollListener = new EndlessScrollListener(layoutManager, getPresenter());
         recyclerView.addOnScrollListener(endlessScrollListener);
         endlessScrollListener.setCurrentItemListener(this);
         endlessScrollListener.setShowOrHideCounter(this);
 
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                //TODO onrefreshlistener
+            }
+        });
+
+        startLoading(title, year, type);
+
+    }
+
+    private void startLoading(String title, int year, String type) {
         //typowa rx java z nucleusem
-        getPresenter().getDataAsync(title, year, type)
+        getPresenter().getDataAsync(1,title, year, type)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::success, this::error);
-        counter.setTranslationX(counter.getWidth()*2);
-
-
     }
 
     //Butterknife przed adnotacje
@@ -90,21 +102,21 @@ public class ListingActivity extends NucleusAppCompatActivity<ListingPresenter> 
     }
 
     private void error(Throwable throwable) {
+        swipeRefreshLayout.setRefreshing(false);
         viewFlipper.setDisplayedChild(viewFlipper.indexOfChild(noInternetImage));
     }
 
-    public void appendItems(SearchResult searchResult){
+    public void appendItems(SearchResult searchResult) {
         adapter.addItems(searchResult.getItems());
         endlessScrollListener.setTotalItemsNumber(Integer.parseInt(searchResult.getTotalResults()));
     }
 
     private void success(SearchResult searchResult) {
-
+        swipeRefreshLayout.setRefreshing(false);
         if ("false".equalsIgnoreCase(searchResult.getResponse())) {
             viewFlipper.setDisplayedChild(viewFlipper.indexOfChild(noResults));
-            //TODO viewFlipper.setDisplayedChild(viewFlipper.indexOfChild(noResults/recyclerView));
         } else {
-            viewFlipper.setDisplayedChild(viewFlipper.indexOfChild(recyclerView));
+            viewFlipper.setDisplayedChild(viewFlipper.indexOfChild(swipeRefreshLayout));
             adapter.setItems(searchResult.getItems());
             endlessScrollListener.setTotalItemsNumber(Integer.parseInt(searchResult.getTotalResults()));
         }
@@ -120,7 +132,7 @@ public class ListingActivity extends NucleusAppCompatActivity<ListingPresenter> 
 
     @Override
     public void onNewCurrentItem(int currentItem, int totalItemsCount) {
-        counter.setText(currentItem+"/"+totalItemsCount);
+        counter.setText(currentItem + "/" + totalItemsCount);
     }
 
     @Override
@@ -131,7 +143,7 @@ public class ListingActivity extends NucleusAppCompatActivity<ListingPresenter> 
 
     @Override
     public void hideCounter() {
-        counter.animate().translationX(counter.getWidth()+2).start();
+        counter.animate().translationX(counter.getWidth() + 2).start();
     }
 
 
