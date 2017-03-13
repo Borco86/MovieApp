@@ -15,6 +15,7 @@ import android.widget.ViewFlipper;
 
 import com.example.rent.movieapp.R;
 import com.example.rent.movieapp.RetrofitProvider;
+import com.example.rent.movieapp.detail.DetailActivity;
 import com.example.rent.movieapp.search.SearchResult;
 
 import butterknife.BindView;
@@ -27,13 +28,13 @@ import nucleus.view.NucleusAppCompatActivity;
 //import rx.schedulers.Schedulers;
 
 @RequiresPresenter(ListingPresenter.class)
-public class ListingActivity extends NucleusAppCompatActivity<ListingPresenter> implements CurrentItemListener, ShowOnHideCounter {
+public class ListingActivity extends NucleusAppCompatActivity<ListingPresenter> implements CurrentItemListener, ShowOnHideCounter, OnMovieItemClickListener {
 
     private static final String SEARCH_TITLE = "searchTitle";
     private static final String SEARCH_YEAR = "searchYear";
     private static final String SEARCH_TYPE = "searchType";
-    private MoviesListAdapter adapter;
     public static final int NO_YEAR_SELECTED = -1;
+    private MoviesListAdapter adapter;
 
     //butter knife zastepuje reczne inicjowanie(binduje)
     @BindView(R.id.view_flipper)
@@ -67,7 +68,9 @@ public class ListingActivity extends NucleusAppCompatActivity<ListingPresenter> 
         String title = getIntent().getStringExtra(SEARCH_TITLE);
         int year = getIntent().getIntExtra(SEARCH_YEAR, NO_YEAR_SELECTED);
         String type = getIntent().getStringExtra(SEARCH_TYPE);
+
         adapter = new MoviesListAdapter();
+        adapter.setOnMovieItemClickListener(this);
         recyclerView.setAdapter(adapter);
         LinearLayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
         recyclerView.setLayoutManager(layoutManager);
@@ -79,7 +82,7 @@ public class ListingActivity extends NucleusAppCompatActivity<ListingPresenter> 
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                //TODO onrefreshlistener
+                startLoading(title, year, type);
             }
         });
 
@@ -89,7 +92,7 @@ public class ListingActivity extends NucleusAppCompatActivity<ListingPresenter> 
 
     private void startLoading(String title, int year, String type) {
         //typowa rx java z nucleusem
-        getPresenter().getDataAsync(1,title, year, type)
+        getPresenter().getDataAsync(title, year, type)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::success, this::error);
@@ -143,18 +146,13 @@ public class ListingActivity extends NucleusAppCompatActivity<ListingPresenter> 
 
     @Override
     public void hideCounter() {
-        counter.animate().translationX(counter.getWidth() + 2).start();
+        counter.animate().translationX(counter.getWidth() * 2).start();
     }
 
+    @Override
+    public void onMovieItemClick(String imdbID) {
+        startActivity(DetailActivity.createIntent(this, imdbID));
 
-//    public void setDataOnUiThread(SearchResult result, boolean isProblemWithInternetConnection) {
-//        runOnUiThread(() -> {
-//            if (isProblemWithInternetConnection) {
-//                error();
-//            } else {
-//                viewFlipper.setDisplayedChild(viewFlipper.indexOfChild(recyclerView));
-//                adapter.setItems(result.getItems());
-//            }
-//        });
-//    }
+    }
+
 }

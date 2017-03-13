@@ -16,6 +16,7 @@ public class MovieAppApplication extends Application implements RetrofitProvider
     @Override
     public void onCreate() {
         super.onCreate();
+        // konfiguracja retrofita
         retrofit = new Retrofit.Builder()
                 .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                 .addConverterFactory(GsonConverterFactory.create())

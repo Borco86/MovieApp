@@ -9,7 +9,6 @@ import android.widget.ImageView;
 import com.bumptech.glide.Glide;
 import com.example.rent.movieapp.R;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -22,7 +21,6 @@ import butterknife.ButterKnife;
 public class PosterAdapter extends RecyclerView.Adapter<PosterAdapter.ViewHolder> {
 
     private List<String> urls = Collections.emptyList();
-    //private List<String> urls = new ArrayList<>(1000);
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -51,7 +49,7 @@ public class PosterAdapter extends RecyclerView.Adapter<PosterAdapter.ViewHolder
         }
     }
 
-    public void setUrls(List<String> urls){
+    public void setUrls(List<String> urls) {
         this.urls = urls;
         notifyDataSetChanged();
     }

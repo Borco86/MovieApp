@@ -17,6 +17,12 @@ public class EndlessScrollListener extends RecyclerView.OnScrollListener {
     private OnLoadNextPageListener listener;
     private ShowOnHideCounter showOrHideCounter;
     private boolean isCounterShown;
+    private CurrentItemListener currentItemListener;
+
+    public EndlessScrollListener(LinearLayoutManager layoutManager, OnLoadNextPageListener listener) {
+        this.layoutManager = layoutManager;
+        this.listener = listener;
+    }
 
     public void setShowOrHideCounter(ShowOnHideCounter showOrHideCounter) {
         this.showOrHideCounter = showOrHideCounter;
@@ -26,13 +32,6 @@ public class EndlessScrollListener extends RecyclerView.OnScrollListener {
         this.currentItemListener = currentItemListener;
     }
 
-    private CurrentItemListener currentItemListener;
-
-
-    public EndlessScrollListener(LinearLayoutManager layoutManager, OnLoadNextPageListener listener) {
-        this.layoutManager = layoutManager;
-        this.listener = listener;
-    }
 
     @Override
     public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
@@ -41,7 +40,7 @@ public class EndlessScrollListener extends RecyclerView.OnScrollListener {
         int alreadyLoadedItems = layoutManager.getItemCount();
         int currentPage = (int) Math.ceil(alreadyLoadedItems / PAGE_SIZE);
         double numberOfAllPages = Math.ceil(totalItemsNumber / PAGE_SIZE);
-        int lastVisibleItemPosition = layoutManager.findLastVisibleItemPosition();
+        int lastVisibleItemPosition = layoutManager.findLastVisibleItemPosition() + 1;
 
         if (currentPage < numberOfAllPages && lastVisibleItemPosition == alreadyLoadedItems && !isLoading) {
             loadNextPage(++currentPage);
