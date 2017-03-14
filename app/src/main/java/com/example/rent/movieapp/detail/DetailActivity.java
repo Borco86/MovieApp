@@ -29,6 +29,8 @@ public class DetailActivity extends NucleusAppCompatActivity<DetailPresenter> {
 
     @BindView(R.id.title_and_year)
     TextView titleAndYear;
+    @BindView(R.id.type)
+    TextView type;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,6 +60,9 @@ public class DetailActivity extends NucleusAppCompatActivity<DetailPresenter> {
 
     private void success(MovieItem movieItem) {
         Glide.with(this).load(movieItem.getPoster()).into(poster);
+        titleAndYear.setText(movieItem.getTitle()+" ("+movieItem.getYear()+")");
+        type.setText(movieItem.getType());
+
 
     }
 
