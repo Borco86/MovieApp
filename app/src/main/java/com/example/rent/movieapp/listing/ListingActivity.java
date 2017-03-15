@@ -21,8 +21,6 @@ import com.example.rent.movieapp.search.SearchResult;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.schedulers.Schedulers;
 import nucleus.factory.RequiresPresenter;
 import nucleus.view.NucleusAppCompatActivity;
 //import rx.schedulers.Schedulers;
@@ -79,23 +77,15 @@ public class ListingActivity extends NucleusAppCompatActivity<ListingPresenter> 
         endlessScrollListener.setCurrentItemListener(this);
         endlessScrollListener.setShowOrHideCounter(this);
 
-        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                startLoading(title, year, type);
-            }
-        });
+        swipeRefreshLayout.setOnRefreshListener(() -> startLoading(title, year, type));
 
         startLoading(title, year, type);
 
     }
 
     private void startLoading(String title, int year, String type) {
-        //typowa rx java z nucleusem
-        getPresenter().getDataAsync(title, year, type)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::success, this::error);
+
+        getPresenter().startLoadingItems(title, year, type);
     }
 
     //Butterknife przed adnotacje
@@ -114,14 +104,14 @@ public class ListingActivity extends NucleusAppCompatActivity<ListingPresenter> 
         endlessScrollListener.setTotalItemsNumber(Integer.parseInt(searchResult.getTotalResults()));
     }
 
-    private void success(SearchResult searchResult) {
+    private void success(ResultAggregator resultAggregator) {
         swipeRefreshLayout.setRefreshing(false);
-        if ("false".equalsIgnoreCase(searchResult.getResponse())) {
+        if ("false".equalsIgnoreCase(resultAggregator.getResponse())) {
             viewFlipper.setDisplayedChild(viewFlipper.indexOfChild(noResults));
         } else {
             viewFlipper.setDisplayedChild(viewFlipper.indexOfChild(swipeRefreshLayout));
-            adapter.setItems(searchResult.getItems());
-            endlessScrollListener.setTotalItemsNumber(Integer.parseInt(searchResult.getTotalResults()));
+            adapter.setItems(resultAggregator.getMovieItems());
+            endlessScrollListener.setTotalItemsNumber(resultAggregator.getTotalItemsResult());
         }
     }
 
@@ -155,4 +145,7 @@ public class ListingActivity extends NucleusAppCompatActivity<ListingPresenter> 
 
     }
 
+    public void setNewAggregatorResult(ResultAggregator newAggregatorResult) {
+        success(newAggregatorResult);
+    }
 }
