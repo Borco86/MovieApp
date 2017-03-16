@@ -5,20 +5,26 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.ImageButton;
 import android.widget.NumberPicker;
 import android.widget.RadioGroup;
+import android.widget.TextView;
 
 import com.azoft.carousellayoutmanager.CarouselLayoutManager;
 import com.azoft.carousellayoutmanager.CarouselZoomPostLayoutListener;
 import com.azoft.carousellayoutmanager.CenterScrollListener;
 import com.example.rent.movieapp.R;
 import com.example.rent.movieapp.RetrofitProvider;
+import com.example.rent.movieapp.detail.DetailActivity;
 import com.example.rent.movieapp.listing.ListingActivity;
 import com.example.rent.movieapp.listing.MovieListingItem;
+import com.example.rent.movieapp.listing.OnMovieItemClickListener;
 
 import java.util.Calendar;
 import java.util.HashMap;
@@ -36,7 +42,8 @@ import io.reactivex.functions.Predicate;
 import io.reactivex.schedulers.Schedulers;
 import retrofit2.Retrofit;
 
-public class SearchActivity extends AppCompatActivity {
+public class SearchActivity extends AppCompatActivity implements OnMovieItemClickListener {
+    private static final String NUMBER_PICKER_STATE = "number_picker_state";
 
     private Map<Integer, String> apiKeysMap = new HashMap<Integer, String>() {{
         put(R.id.radio_movies, "movie");
@@ -76,6 +83,14 @@ public class SearchActivity extends AppCompatActivity {
         numberPicker.setValue(year);
         numberPicker.setWrapSelectorWheel(true);
 
+        editText.setOnEditorActionListener((v, actionId, event) -> {
+            if (actionId== EditorInfo.IME_NULL && event.getAction()==KeyEvent.ACTION_DOWN) {
+                Log.d("result", "action" + event.getAction());
+                onSearchButtonClick();
+            }
+            return false;
+        });
+
         posterAdapter = new PosterAdapter();
         //posterRecyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
         final CarouselLayoutManager layoutManager = new CarouselLayoutManager(CarouselLayoutManager.HORIZONTAL);
@@ -89,18 +104,31 @@ public class SearchActivity extends AppCompatActivity {
         RetrofitProvider retrofitProvider = (RetrofitProvider) getApplication();
         Retrofit retrofit = retrofitProvider.provideRetrofit();
         SearchService searchService = retrofit.create(SearchService.class);
-        searchService.search("a+", "2016", null)
+        searchService.search(1,"a+", "2016", null)
                 .flatMap(searchResult -> Observable.fromIterable(searchResult.getItems()))
-                .map(MovieListingItem::getPoster)
-                .filter(posterUrl -> !"N/A".equalsIgnoreCase(posterUrl))
+                .map((Function<MovieListingItem, SimpleMovieItem>) movieListingItem -> new SimpleMovieItem(movieListingItem.getPoster(),movieListingItem.getImdbID()))
+                .filter(simpleMovieItem -> !"N/A".equalsIgnoreCase(simpleMovieItem.getPoster()))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .toList()
                 .subscribe(this::success, this::error);
+        posterAdapter.setOnMovieItemClickListener(this);
     }
 
-    private void success(List<String> list) {
-        posterAdapter.setUrls(list);
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt(NUMBER_PICKER_STATE, numberPicker.getValue());
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        numberPicker.setValue(savedInstanceState.getInt(NUMBER_PICKER_STATE));
+    }
+
+    private void success(List<SimpleMovieItem> list) {
+        posterAdapter.setSimpleMovieItem(list);
     }
 
     private void error(Throwable throwable) {
@@ -127,4 +155,8 @@ public class SearchActivity extends AppCompatActivity {
     }
 
 
+    @Override
+    public void onMovieItemClick(String imdbID) {
+        startActivity(DetailActivity.createIntent(this, imdbID));
+    }
 }
