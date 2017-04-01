@@ -49,6 +49,8 @@ dependencies {
     compile 'com.annimon:stream:1.1.6'
     compile 'com.jakewharton:butterknife:8.5.1'
     compile 'com.azoft.carousellayoutmanager:carousel:1.2.1'
+    compile 'com.github.jd-alexander:LikeButton:0.2.0'
+    compile 'com.facebook.stetho:stetho:1.4.2'
     annotationProcessor 'com.jakewharton:butterknife-compiler:8.5.1'
 
     testCompile 'junit:junit:4.12'

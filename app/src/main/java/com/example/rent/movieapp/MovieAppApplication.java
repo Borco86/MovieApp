@@ -2,6 +2,8 @@ package com.example.rent.movieapp;
 
 import android.app.Application;
 
+import com.facebook.stetho.Stetho;
+
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
@@ -16,6 +18,7 @@ public class MovieAppApplication extends Application implements RetrofitProvider
     @Override
     public void onCreate() {
         super.onCreate();
+        Stetho.initializeWithDefaults(this);
         // konfiguracja retrofita
         retrofit = new Retrofit.Builder()
                 .addCallAdapterFactory(RxJava2CallAdapterFactory.create())

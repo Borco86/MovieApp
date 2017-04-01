@@ -1,5 +1,6 @@
 package com.example.rent.movieapp.listing;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -13,9 +14,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ViewFlipper;
 
+import com.example.rent.movieapp.MovieDatabaseOpenHelper;
 import com.example.rent.movieapp.R;
 import com.example.rent.movieapp.RetrofitProvider;
 import com.example.rent.movieapp.detail.DetailActivity;
+import com.example.rent.movieapp.search.MovieTableContract;
 import com.example.rent.movieapp.search.SearchResult;
 
 import butterknife.BindView;
@@ -26,13 +29,14 @@ import nucleus.view.NucleusAppCompatActivity;
 //import rx.schedulers.Schedulers;
 
 @RequiresPresenter(ListingPresenter.class)
-public class ListingActivity extends NucleusAppCompatActivity<ListingPresenter> implements CurrentItemListener, ShowOnHideCounter, OnMovieItemClickListener {
+public class ListingActivity extends NucleusAppCompatActivity<ListingPresenter> implements CurrentItemListener, ShowOnHideCounter, OnMovieItemClickListener, OnLikeButtonClickListener {
 
     private static final String SEARCH_TITLE = "searchTitle";
     private static final String SEARCH_YEAR = "searchYear";
     private static final String SEARCH_TYPE = "searchType";
     public static final int NO_YEAR_SELECTED = -1;
     private MoviesListAdapter adapter;
+    MovieDatabaseOpenHelper movieDatabaseOpenHelper;
 
     //butter knife zastepuje reczne inicjowanie(binduje)
     @BindView(R.id.view_flipper)
@@ -57,6 +61,7 @@ public class ListingActivity extends NucleusAppCompatActivity<ListingPresenter> 
         setContentView(R.layout.activity_listing);
 
         ButterKnife.bind(this);
+        movieDatabaseOpenHelper = new MovieDatabaseOpenHelper(this);
 
         if (savedInstanceState == null) {
             RetrofitProvider retrofitProvider = (RetrofitProvider) getApplication();
@@ -69,6 +74,7 @@ public class ListingActivity extends NucleusAppCompatActivity<ListingPresenter> 
 
         adapter = new MoviesListAdapter();
         adapter.setOnMovieItemClickListener(this);
+        adapter.setOnLikeButtonClickListener(this);
         recyclerView.setAdapter(adapter);
         LinearLayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
         recyclerView.setLayoutManager(layoutManager);
@@ -147,5 +153,15 @@ public class ListingActivity extends NucleusAppCompatActivity<ListingPresenter> 
 
     public void setNewAggregatorResult(ResultAggregator newAggregatorResult) {
         success(newAggregatorResult);
+    }
+
+    @Override
+    public void onLikeButtonClick(MovieListingItem movieListingItem) {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(MovieTableContract.COLUMN_TITLE, movieListingItem.getTitle());
+        contentValues.put(MovieTableContract.COLUMN_TYPE, movieListingItem.getType());
+        contentValues.put(MovieTableContract.COLUMN_YEAR, movieListingItem.getYear());
+        contentValues.put(MovieTableContract.COLUMN_POSTER, movieListingItem.getPoster());
+        movieDatabaseOpenHelper.getWritableDatabase().insert(MovieTableContract.TABLE_NAME, null ,contentValues);
     }
 }
