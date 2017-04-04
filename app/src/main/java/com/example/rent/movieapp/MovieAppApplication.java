@@ -2,6 +2,8 @@ package com.example.rent.movieapp;
 
 import android.app.Application;
 
+import com.example.rent.movieapp.dagger.AppComponent;
+import com.example.rent.movieapp.dagger.DaggerAppComponent;
 import com.facebook.stetho.Stetho;
 
 import retrofit2.Retrofit;
@@ -12,23 +14,19 @@ import retrofit2.converter.gson.GsonConverterFactory;
  * Created by RENT on 2017-03-11.
  */
 
-public class MovieAppApplication extends Application implements RetrofitProvider{
+public class MovieAppApplication extends Application {
 
-    private Retrofit retrofit;
+    private AppComponent appComponent;
+
     @Override
     public void onCreate() {
         super.onCreate();
         Stetho.initializeWithDefaults(this);
-        // konfiguracja retrofita
-        retrofit = new Retrofit.Builder()
-                .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
-                .addConverterFactory(GsonConverterFactory.create())
-                .baseUrl("https://www.omdbapi.com/")
-                .build();
+        appComponent = DaggerAppComponent.builder().build();
+
     }
 
-    @Override
-    public Retrofit provideRetrofit() {
-        return retrofit;
+    public AppComponent getAppComponent() {
+        return appComponent;
     }
 }

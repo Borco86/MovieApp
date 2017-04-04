@@ -3,7 +3,6 @@ package com.example.rent.movieapp.search;
 import android.support.design.widget.TextInputEditText;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -14,13 +13,12 @@ import android.widget.CompoundButton;
 import android.widget.ImageButton;
 import android.widget.NumberPicker;
 import android.widget.RadioGroup;
-import android.widget.TextView;
 
 import com.azoft.carousellayoutmanager.CarouselLayoutManager;
 import com.azoft.carousellayoutmanager.CarouselZoomPostLayoutListener;
 import com.azoft.carousellayoutmanager.CenterScrollListener;
+import com.example.rent.movieapp.MovieAppApplication;
 import com.example.rent.movieapp.R;
-import com.example.rent.movieapp.RetrofitProvider;
 import com.example.rent.movieapp.detail.DetailActivity;
 import com.example.rent.movieapp.listing.ListingActivity;
 import com.example.rent.movieapp.listing.MovieListingItem;
@@ -31,6 +29,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnCheckedChanged;
@@ -38,7 +38,6 @@ import butterknife.OnClick;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.functions.Function;
-import io.reactivex.functions.Predicate;
 import io.reactivex.schedulers.Schedulers;
 import retrofit2.Retrofit;
 
@@ -68,6 +67,9 @@ public class SearchActivity extends AppCompatActivity implements OnMovieItemClic
     @BindView(R.id.poster_recycler_view)
     RecyclerView posterRecyclerView;
     private PosterAdapter posterAdapter;
+
+    @Inject
+    Retrofit retrofit;
 
 
     @Override
@@ -101,8 +103,9 @@ public class SearchActivity extends AppCompatActivity implements OnMovieItemClic
         layoutManager.setPostLayoutListener(new CarouselZoomPostLayoutListener());
 
 
-        RetrofitProvider retrofitProvider = (RetrofitProvider) getApplication();
-        Retrofit retrofit = retrofitProvider.provideRetrofit();
+        MovieAppApplication movieAppApplication = (MovieAppApplication) getApplication();
+        movieAppApplication.getAppComponent().inject(this);
+
         SearchService searchService = retrofit.create(SearchService.class);
         searchService.search(1,"a+", "2016", null)
                 .flatMap(searchResult -> Observable.fromIterable(searchResult.getItems()))

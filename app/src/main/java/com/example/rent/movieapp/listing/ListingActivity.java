@@ -14,18 +14,21 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ViewFlipper;
 
+import com.example.rent.movieapp.MovieAppApplication;
 import com.example.rent.movieapp.MovieDatabaseOpenHelper;
 import com.example.rent.movieapp.R;
-import com.example.rent.movieapp.RetrofitProvider;
 import com.example.rent.movieapp.detail.DetailActivity;
 import com.example.rent.movieapp.search.MovieTableContract;
 import com.example.rent.movieapp.search.SearchResult;
+
+import javax.inject.Inject;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import nucleus.factory.RequiresPresenter;
 import nucleus.view.NucleusAppCompatActivity;
+import retrofit2.Retrofit;
 //import rx.schedulers.Schedulers;
 
 @RequiresPresenter(ListingPresenter.class)
@@ -54,6 +57,9 @@ public class ListingActivity extends NucleusAppCompatActivity<ListingPresenter> 
     @BindView(R.id.swipe_refresh)
     SwipeRefreshLayout swipeRefreshLayout;
 
+    @Inject
+    Retrofit retrofit;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,12 +67,12 @@ public class ListingActivity extends NucleusAppCompatActivity<ListingPresenter> 
         setContentView(R.layout.activity_listing);
 
         ButterKnife.bind(this);
+        MovieAppApplication movieAppApplication = (MovieAppApplication) getApplication();
+        movieAppApplication.getAppComponent().inject(this);
+
         movieDatabaseOpenHelper = new MovieDatabaseOpenHelper(this);
 
-        if (savedInstanceState == null) {
-            RetrofitProvider retrofitProvider = (RetrofitProvider) getApplication();
-            getPresenter().setRetrofit(retrofitProvider.provideRetrofit());
-        }
+        getPresenter().setRetrofit(retrofit);
 
         String title = getIntent().getStringExtra(SEARCH_TITLE);
         int year = getIntent().getIntExtra(SEARCH_YEAR, NO_YEAR_SELECTED);
@@ -162,6 +168,6 @@ public class ListingActivity extends NucleusAppCompatActivity<ListingPresenter> 
         contentValues.put(MovieTableContract.COLUMN_TYPE, movieListingItem.getType());
         contentValues.put(MovieTableContract.COLUMN_YEAR, movieListingItem.getYear());
         contentValues.put(MovieTableContract.COLUMN_POSTER, movieListingItem.getPoster());
-        movieDatabaseOpenHelper.getWritableDatabase().insert(MovieTableContract.TABLE_NAME, null ,contentValues);
+        movieDatabaseOpenHelper.getWritableDatabase().insert(MovieTableContract.TABLE_NAME, null, contentValues);
     }
 }

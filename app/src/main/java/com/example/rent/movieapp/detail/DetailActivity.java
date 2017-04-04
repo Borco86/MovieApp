@@ -7,8 +7,10 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.example.rent.movieapp.MovieAppApplication;
 import com.example.rent.movieapp.R;
-import com.example.rent.movieapp.RetrofitProvider;
+
+import javax.inject.Inject;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -17,6 +19,7 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import nucleus.factory.RequiresPresenter;
 import nucleus.view.NucleusAppCompatActivity;
+import retrofit2.Retrofit;
 
 @RequiresPresenter(DetailPresenter.class)
 public class DetailActivity extends NucleusAppCompatActivity<DetailPresenter> {
@@ -32,6 +35,9 @@ public class DetailActivity extends NucleusAppCompatActivity<DetailPresenter> {
     @BindView(R.id.type)
     TextView type;
 
+    @Inject
+    Retrofit retrofit;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -40,8 +46,10 @@ public class DetailActivity extends NucleusAppCompatActivity<DetailPresenter> {
 
         String imdbId = getIntent().getStringExtra(ID_KEY);
 
-        RetrofitProvider retrofitProvider = (RetrofitProvider) getApplication();
-        getPresenter().setRetrofit(retrofitProvider.provideRetrofit());
+        MovieAppApplication movieAppApplication = (MovieAppApplication) getApplication();
+        movieAppApplication.getAppComponent().inject(this);
+
+        getPresenter().setRetrofit(retrofit);
 
         subscribe = getPresenter().loadDetail(imdbId)
                 .subscribeOn(Schedulers.io())
@@ -60,7 +68,7 @@ public class DetailActivity extends NucleusAppCompatActivity<DetailPresenter> {
 
     private void success(MovieItem movieItem) {
         Glide.with(this).load(movieItem.getPoster()).into(poster);
-        titleAndYear.setText(movieItem.getTitle()+" ("+movieItem.getYear()+")");
+        titleAndYear.setText(movieItem.getTitle() + " (" + movieItem.getYear() + ")");
         type.setText(movieItem.getType());
 
 
